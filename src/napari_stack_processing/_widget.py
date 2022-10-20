@@ -6,41 +6,73 @@ see: https://napari.org/stable/plugins/guides.html?#widgets
 
 Replace code below according to your needs.
 """
-from typing import TYPE_CHECKING
+from typing import List
 
+import napari
+import numpy as np
 from magicgui import magic_factory
-from qtpy.QtWidgets import QHBoxLayout, QPushButton, QWidget
-
-if TYPE_CHECKING:
-    import napari
-
-
-class ExampleQWidget(QWidget):
-    # your QWidget.__init__ can optionally request the napari viewer instance
-    # in one of two ways:
-    # 1. use a parameter called `napari_viewer`, as done here
-    # 2. use a type annotation of 'napari.viewer.Viewer' for any parameter
-    def __init__(self, napari_viewer):
-        super().__init__()
-        self.viewer = napari_viewer
-
-        btn = QPushButton("Click me!")
-        btn.clicked.connect(self._on_click)
-
-        self.setLayout(QHBoxLayout())
-        self.layout().addWidget(btn)
-
-    def _on_click(self):
-        print("napari has", len(self.viewer.layers), "layers")
+from napari.layers.image import Image
 
 
 @magic_factory
-def example_magic_widget(img_layer: "napari.layers.Image"):
-    print(f"you have selected {img_layer}")
+def deinterleave_widget(
+    img_layer: "napari.layers.Image", num_channels: int = 2
+) -> List[napari.types.LayerDataTuple]:
+    """
+    The ImageJ deinterleave behavior is equivalent to deinterleaving on
+    numpy axis==0.
+    """
+    img = img_layer.data
+
+    deinterleaved = []
+
+    for channel in range(num_channels):
+        # Extract channel
+        channel_img = img[channel::num_channels, ...]
+
+        deinterleaved += [
+            (channel_img, {"name": f"{img_layer.name} C{channel}"})
+        ]
+
+    return deinterleaved
 
 
-# Uses the `autogenerate: true` flag in the plugin manifest
-# to indicate it should be wrapped as a magicgui to autogenerate
-# a widget.
-def example_function_widget(img_layer: "napari.layers.Image"):
-    print(f"you have selected {img_layer}")
+@magic_factory
+def interleave_widget(
+    layer_a: "napari.layers.Image", layer_b: "napari.layers.Image"
+) -> Image:
+    img_a = layer_a.data
+    img_b = layer_b.data
+
+    if img_a.dtype != img_b.dtype:
+        print(
+            "Inputs must have the same type, but are ",
+            f"{img_a.dtype} and {img_b.dtype}.",
+        )
+        return
+
+    if len(img_a.shape) != len(img_b.shape):
+        print(
+            "Inputs must have the same dimensionality, but are ",
+            f"{img_a.shape} and {img_b.shape}.",
+        )
+        return
+
+    # Check that all but the first dimension match
+    if np.any(img_a.shape[1:] != img_b.shape[1:]):
+        print(
+            "Inputs must have the same shape except the first dimension",
+            f", but are {img_a.shape} and {img_b.shape}.",
+        )
+        return
+
+    new_shape = list(img_a.shape)
+    new_shape[0] += img_b.shape[0]
+
+    interleaved = np.empty(new_shape, dtype=img_a.dtype)
+    interleaved[0::2, ...] = img_a
+    interleaved[1::2, ...] = img_b
+
+    return Image(
+        interleaved, name=f"Interleaved {layer_a.name} and {layer_b.name}"
+    )

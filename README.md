@@ -9,6 +9,8 @@
 
 A plugin for manipulating image stacks with napari
 
+Inspiration from https://imagej.net/plugins/stack-manipulation
+
 ----------------------------------
 
 This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookiecutter-napari-plugin] template.
