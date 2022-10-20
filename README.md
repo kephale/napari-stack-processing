@@ -7,9 +7,11 @@
 [![codecov](https://codecov.io/gh/kephale/napari-stack-processing/branch/main/graph/badge.svg)](https://codecov.io/gh/kephale/napari-stack-processing)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-stack-processing)](https://napari-hub.org/plugins/napari-stack-processing)
 
-A plugin for manipulating image stacks with napari
+A plugin for manipulating image stacks using napari with inspiration
+from https://imagej.net/plugins/stack-manipulation.
 
-Inspiration from https://imagej.net/plugins/stack-manipulation
+Check out https://github.com/RobAnKo/napari-image-stacker for another
+napari plugin with related functionality.
 
 ----------------------------------
 
