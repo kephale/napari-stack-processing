@@ -76,3 +76,32 @@ def interleave_widget(
     return Image(
         interleaved, name=f"Interleaved {layer_a.name} and {layer_b.name}"
     )
+
+
+@magic_factory
+def stack_splitter_widget(
+    layer: "napari.layers.Image", num_substacks: int
+) -> Image:
+    """
+    The ImageJ deinterleave behavior is equivalent to deinterleaving on
+    numpy axis==0.
+    """
+    img = layer.data
+
+    stacks = []
+
+    if img.shape[0] % num_substacks != 0:
+        print(f"Number of substacks must be a divisor of {img.shape[0]}")
+        return
+
+    substack_length = img.shape[0] / num_substacks
+
+    for substack_id in range(num_substacks):
+        start_idx = substack_id * substack_length
+        stop_idx = (substack_id + 1) * substack_length - 1
+
+        substack = img[start_idx:stop_idx, ...]
+
+        stacks += [(substack, {"name": f"{layer.name} Sub{substack_id}"})]
+
+    return stacks

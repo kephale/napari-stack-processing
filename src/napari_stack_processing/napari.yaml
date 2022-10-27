@@ -8,8 +8,13 @@ contributions:
     - id: napari-stack-processing.make_interleave_widget
       python_name: napari_stack_processing._widget:interleave_widget
       title: Interleave widget
+    - id: napari-stack-processing.make_stack_splitter_widget
+      python_name: napari_stack_processing._widget:stack_splitter_widget
+      title: Stack splitter widget
   widgets:
     - command: napari-stack-processing.make_deinterleave_widget
       display_name: Deinterleave
     - command: napari-stack-processing.make_interleave_widget
       display_name: Interleave
+    - command: napari-stack-processing.make_stack_splitter_widget
+      display_name: Stack splitter
